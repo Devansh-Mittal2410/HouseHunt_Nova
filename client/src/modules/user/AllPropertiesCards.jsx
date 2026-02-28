@@ -4,6 +4,16 @@ import Toast from "../common/Toast";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
+const getApiOrigin = () => {
+  try {
+    return new URL(API_BASE_URL).origin;
+  } catch {
+    return API_BASE_URL;
+  }
+};
+
+const IMAGE_BASE_URL = import.meta.env.VITE_UPLOADS_URL || getApiOrigin();
+
 const getPropertyImageUrl = (property) => {
   const imageData = property?.propertyImage;
 
@@ -37,7 +47,7 @@ const getPropertyImageUrl = (property) => {
 
   const absolutePath = normalizedPath.startsWith("http")
     ? normalizedPath
-    : `${API_BASE_URL}${normalizedPath.startsWith("/") ? normalizedPath : `/${normalizedPath}`}`;
+    : `${IMAGE_BASE_URL}${normalizedPath.startsWith("/") ? normalizedPath : `/${normalizedPath}`}`;
 
   return encodeURI(absolutePath);
 };
