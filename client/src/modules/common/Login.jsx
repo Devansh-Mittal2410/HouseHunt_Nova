@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Toast from "../common/Toast";
+import { UserContext } from "../../App";
 
 axios.defaults.withCredentials = true;
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
@@ -9,6 +10,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { setUserData } = useContext(UserContext);
   const [data, setData] = useState({ email: "", password: "" });
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
 
@@ -33,6 +35,7 @@ const Login = () => {
       if (res.data.success) {
         showToast("success", res.data.message);
         localStorage.setItem("user", JSON.stringify(res.data.user));
+        setUserData(res.data.user);
 
         const user = res.data.user;
         setTimeout(() => {
@@ -54,8 +57,6 @@ const Login = () => {
               navigate("/login");
               break;
           }
-
-          window.location.reload();
         }, 1000);
       } else {
         showToast("error", res.data.message);

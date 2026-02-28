@@ -1,4 +1,4 @@
-import { createContext, useMemo } from "react";
+import { createContext, useMemo, useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import Home from "./modules/common/Home";
 import Login from "./modules/common/Login";
@@ -11,15 +11,18 @@ import RenterHome from "./modules/user/renter/RenterHome";
 export const UserContext = createContext(null);
 
 function App() {
-  const contextValue = useMemo(() => {
+  const [userData, setUserData] = useState(() => {
     const storedUser = localStorage.getItem("user");
-    const userData = storedUser ? JSON.parse(storedUser) : null;
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
 
+  const contextValue = useMemo(() => {
     return {
       userLoggedIn: Boolean(userData),
       userData,
+      setUserData,
     };
-  }, []);
+  }, [userData]);
 
   return (
     <UserContext.Provider value={contextValue}>
