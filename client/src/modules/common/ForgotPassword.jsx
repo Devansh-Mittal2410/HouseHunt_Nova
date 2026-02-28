@@ -30,11 +30,13 @@ const ForgotPassword = () => {
     e.preventDefault();
 
     if (!data.email || !data.password || !data.confirmPassword) {
-      showToast("Please fill all fields");
+      showToast("error", "Please fill all fields");
+      return;
     }
 
     if (data.password !== data.confirmPassword) {
-       showToast("Passwords do not match");
+      showToast("error", "Passwords do not match");
+      return;
     }
 
     try {
@@ -45,18 +47,17 @@ const ForgotPassword = () => {
       );
 
       if (res.data.success) {
-        showToast("Your password has been changed!");
+        showToast("success", "Your password has been changed!");
         navigate("/login");
       } else {
-        showToast(res.data.message);
+        showToast("error", res.data.message);
       }
     } catch (err) {
       if (err.response && err.response.status === 401) {
-        showToast("User doesn't exist");
+        showToast("error", "User doesn't exist");
       } else {
-        showToast("Something went wrong. Please try again.");
+        showToast("error", "Something went wrong. Please try again.");
       }
-      navigate("/register");
     }
   };
 

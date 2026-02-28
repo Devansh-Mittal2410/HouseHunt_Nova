@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import axios from "axios";
 import { message } from "antd";
 import {useNavigate} from "react-router-dom"
@@ -8,6 +8,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 function AddProperty() {
   const [image, setImage] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [propertyDetails, setPropertyDetails] = useState({
     propertyType: "residential",
     propertyAdType: "rent",
@@ -16,6 +17,7 @@ function AddProperty() {
     propertyAmt: 0,
     additionalInfo: "",
   });
+  const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
   const handleImageChange = (e) => {
@@ -27,15 +29,25 @@ function AddProperty() {
     setPropertyDetails((prev) => ({ ...prev, [name]: value }));
   };
 
-  useEffect(() => {
-    setPropertyDetails((prev) => ({
-      ...prev,
-      propertyImages: image,
-    }));
-  }, [image]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!image || image.length === 0) {
+      message.error("Please upload at least one image");
+      return;
+    }
+
+    if (!propertyDetails.propertyAddress.trim() || !propertyDetails.ownerContact.trim()) {
+      message.error("Please fill all required fields");
+      return;
+    }
+
+    if (Number(propertyDetails.propertyAmt) <= 0) {
+      message.error("Property amount must be greater than 0");
+      return;
+    }
+
+    setIsSubmitting(true);
 
     const formData = new FormData();
     formData.append("propertyType", propertyDetails.propertyType);
@@ -69,6 +81,9 @@ function AddProperty() {
           additionalInfo: "",
         });
         setImage(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
       } else {
         message.error(res.data.message || "Unauthorized access");
         navigate("/login");
@@ -79,10 +94,12 @@ function AddProperty() {
         message.error("Session expired, please login again");
         navigate("/login");
       } else {
-        message.error("Failed to add property");
+        message.error(error.response?.data?.message || "Failed to add property");
       }
+    } finally {
+      setIsSubmitting(false);
     }
-  };;
+  };
 
   return (
  <div className="max-w-5xl mx-auto bg-gray-900/80 border border-gray-700 backdrop-blur-md shadow-2xl rounded-xl p-8 mt-12 text-white">
@@ -149,6 +166,7 @@ function AddProperty() {
           Property Images
         </label>
         <input
+          ref={fileInputRef}
           type="file"
           accept="image/*"
           multiple
@@ -208,9 +226,10 @@ function AddProperty() {
     <div className="text-right">
       <button
         type="submit"
+        disabled={isSubmitting}
         className="bg-indigo-600 text-white font-semibold px-6 py-2 rounded-lg shadow-lg hover:bg-indigo-700 transition duration-200"
       >
-        Submit Form
+        {isSubmitting ? "Submitting..." : "Submit Form"}
       </button>
     </div>
   </form>

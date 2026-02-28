@@ -1,17 +1,27 @@
 const express = require("express");
 const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 const { authMiddleware } = require("../middlewares/authMiddleware");
 const { addPropertyController, getAllOwnerPropertiesController, handleAllBookingstatusController, deletePropertyController, updatePropertyController, getAllBookingsController } = require("../controllers/ownerController");
 
 
 const router = express.Router();
 
+const uploadDir = process.env.UPLOAD_DIR || path.resolve(__dirname, "../uploads");
+
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "./uploads/");
+    cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
-    cb(null, file.originalname);
+    const ext = path.extname(file.originalname);
+    const baseName = path.basename(file.originalname, ext).replace(/\s+/g, "-");
+    cb(null, `${Date.now()}-${baseName}${ext}`);
   },
 });
 

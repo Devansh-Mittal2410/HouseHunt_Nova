@@ -28,6 +28,7 @@ const Login = () => {
 
     if (!data.email || !data.password) {
       showToast("error", "Please fill all fields");
+      return;
     }
 
     try {

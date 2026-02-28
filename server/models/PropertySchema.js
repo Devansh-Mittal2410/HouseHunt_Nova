@@ -26,7 +26,13 @@ const propertyModel = mongoose.Schema({
       default: 0,
    },
    propertyImage: {
-      type: Object
+      type: [
+         {
+            filename: { type: String },
+            path: { type: String }
+         }
+      ],
+      default: []
    },
    additionalInfo:{
       type: String,

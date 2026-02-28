@@ -63,12 +63,21 @@ const loginController = async (req, res) => {
       expiresIn: "1d",
     });
 
+    const configuredOrigins = (process.env.CLIENT_ORIGIN || "")
+      .split(",")
+      .map((origin) => origin.trim())
+      .filter(Boolean);
+    const hasLocalOrigin = configuredOrigins.some(
+      (origin) => origin.includes("localhost") || origin.includes("127.0.0.1")
+    );
+    const useSecureCookie = !hasLocalOrigin;
+
     user.password = undefined;
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false,
-      sameSite: "strict",
+      secure: useSecureCookie,
+      sameSite: useSecureCookie ? "none" : "lax",
       maxAge: 24 * 60 * 60 * 1000
     })
     return res.status(200).send({
