@@ -63,14 +63,11 @@ const loginController = async (req, res) => {
       expiresIn: "1d",
     });
 
-    const configuredOrigins = (process.env.CLIENT_ORIGIN || "")
-      .split(",")
-      .map((origin) => origin.trim())
-      .filter(Boolean);
-    const hasLocalOrigin = configuredOrigins.some(
-      (origin) => origin.includes("localhost") || origin.includes("127.0.0.1")
-    );
-    const useSecureCookie = !hasLocalOrigin;
+    const requestOrigin = req.get("origin") || "";
+    const isLocalOrigin =
+      requestOrigin.includes("localhost") || requestOrigin.includes("127.0.0.1");
+    const isHttpsOrigin = requestOrigin.startsWith("https://");
+    const useSecureCookie = isHttpsOrigin && !isLocalOrigin;
 
     user.password = undefined;
 
