@@ -4,6 +4,27 @@ import Toast from "../common/Toast";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
+const getPropertyImageUrl = (property) => {
+  const imageData = property?.propertyImage;
+
+  let imagePath = "";
+  if (Array.isArray(imageData)) {
+    imagePath = imageData[0]?.path || imageData[0]?.url || "";
+  } else if (imageData && typeof imageData === "object") {
+    imagePath = imageData.path || imageData.url || "";
+  } else if (typeof imageData === "string") {
+    imagePath = imageData;
+  }
+
+  if (!imagePath) return "";
+
+  const absolutePath = imagePath.startsWith("http")
+    ? imagePath
+    : `${API_BASE_URL}${imagePath.startsWith("/") ? imagePath : `/${imagePath}`}`;
+
+  return encodeURI(absolutePath);
+};
+
 const AllPropertiesCards = ({ loggedIn }) => {
   const [allProperties, setAllProperties] = useState([]);
   const [filterPropertyType, setPropertyType] = useState("");
@@ -130,11 +151,17 @@ const AllPropertiesCards = ({ loggedIn }) => {
               key={property._id}
               className="bg-gray-800/70 border border-gray-700 rounded-lg shadow-lg hover:shadow-indigo-600/40 transition transform hover:-translate-y-1 overflow-hidden"
             >
+              {getPropertyImageUrl(property) ? (
               <img
-                src={`${API_BASE_URL}${property.propertyImage[0]?.path}`}
+                src={getPropertyImageUrl(property)}
                 alt="Property"
                 className="w-full h-40 object-cover"
               />
+              ) : (
+                <div className="w-full h-40 bg-gray-700 flex items-center justify-center text-gray-300 text-sm">
+                  No image available
+                </div>
+              )}
               <div className="p-4">
                 <h3 className="font-semibold text-lg text-white">{property.propertyAddress}</h3>
                 <p className="text-gray-400 text-sm">
@@ -188,11 +215,17 @@ const AllPropertiesCards = ({ loggedIn }) => {
               ✖
             </button>
             <h3 className="text-xl font-bold mb-4 text-white">Property Info</h3>
-            <img
-              src={`${API_BASE_URL}${selectedProperty.propertyImage[0]?.path}`}
-              alt="Property"
-              className="w-full h-48 object-cover rounded mb-4"
-            />
+            {getPropertyImageUrl(selectedProperty) ? (
+              <img
+                src={getPropertyImageUrl(selectedProperty)}
+                alt="Property"
+                className="w-full h-48 object-cover rounded mb-4"
+              />
+            ) : (
+              <div className="w-full h-48 bg-gray-800 rounded mb-4 flex items-center justify-center text-gray-300 text-sm">
+                No image available
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-4 text-sm text-gray-300">
               <div>
                 <p>
