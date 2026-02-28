@@ -8,19 +8,36 @@ const getPropertyImageUrl = (property) => {
   const imageData = property?.propertyImage;
 
   let imagePath = "";
+  let imageFileName = "";
   if (Array.isArray(imageData)) {
     imagePath = imageData[0]?.path || imageData[0]?.url || "";
+    imageFileName = imageData[0]?.filename || "";
   } else if (imageData && typeof imageData === "object") {
-    imagePath = imageData.path || imageData.url || "";
+    const firstKey = Object.keys(imageData)[0];
+    const firstEntry = firstKey ? imageData[firstKey] : null;
+
+    imagePath =
+      imageData.path ||
+      imageData.url ||
+      firstEntry?.path ||
+      firstEntry?.url ||
+      "";
+    imageFileName = imageData.filename || firstEntry?.filename || "";
   } else if (typeof imageData === "string") {
     imagePath = imageData;
   }
 
+  if (!imagePath && imageFileName) {
+    imagePath = `/uploads/${imageFileName}`;
+  }
+
   if (!imagePath) return "";
 
-  const absolutePath = imagePath.startsWith("http")
-    ? imagePath
-    : `${API_BASE_URL}${imagePath.startsWith("/") ? imagePath : `/${imagePath}`}`;
+  const normalizedPath = imagePath.replace(/\\/g, "/");
+
+  const absolutePath = normalizedPath.startsWith("http")
+    ? normalizedPath
+    : `${API_BASE_URL}${normalizedPath.startsWith("/") ? normalizedPath : `/${normalizedPath}`}`;
 
   return encodeURI(absolutePath);
 };
